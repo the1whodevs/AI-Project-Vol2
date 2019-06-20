@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.3731152, g: 0.38073796, b: 0.35873365, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311554, g: 0.38073874, b: 0.3587339, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -296,6 +296,7 @@ MonoBehaviour:
   - {fileID: 1828601874963942, guid: 3029cea8184deb14eb38f8f81f126660, type: 2}
   _corridorPrefab: {fileID: 1246081502423892, guid: 1761285a9ec79354d84cf4979b15b50f,
     type: 2}
+  _minIterations: 2
 --- !u!4 &841445812
 Transform:
   m_ObjectHideFlags: 0

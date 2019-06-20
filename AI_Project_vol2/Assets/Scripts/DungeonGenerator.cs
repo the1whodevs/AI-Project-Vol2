@@ -2,148 +2,166 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ModuleType { Room, Corridor, Junction, InvalidType }
+
 public class DungeonGenerator : MonoBehaviour
 {
     [SerializeField] private GameObject[] _roomPrefabs; //index + 1 = number of exits
     [SerializeField] private GameObject[] _junctionPrefabs; //index + 3 = number of exits 
     [SerializeField] private GameObject _corridorPrefab; //exactly 2 exits
 
-    private int _minModulesToSpawn; //the algorithm will keep spawning until this number is reached
+    [SerializeField] private int _minIterations; //the algorithm will keep spawning until this number is reached
 
     private GameObject _currentModule; //the current module we're checking to connect all exits
+    private ModuleInfo _currentModuleInfo; //the current moduleInfo of the module we're checking to connect all exits
 
     private Transform _mapTransform; //the transform that is parent to all modules
 
-    private Queue _exits = new Queue(); //all exits of each module connected
+    private Queue<GameObject> _exits = new Queue<GameObject>(); //all exits of each module connected
+    private Queue<GameObject> _allModulesToConnect = new Queue<GameObject>(); //all modules that need to be connected
 
     private int _moduleCount = 0;
 
     // Use this for initialization
     void Start ()
     {
-        _mapTransform = new GameObject("Map").transform;
-
-        _currentModule = PickStartingModule(); //first pick a starting module
-
-        Instantiate(_currentModule, Vector3.zero, Quaternion.identity, _mapTransform); //then spawn it
-        _moduleCount++;
-
-        //then note down all of its exits and pick one at random
-        int numOfExits = _currentModule.transform.childCount;
-
-        for (int i = 0; i < numOfExits; i++)
-        {
-            _exits.Enqueue(_currentModule.transform.GetChild(i).GetComponent<ExitInfo>());
-        }
-
-        ExitInfo.ModuleType[] connectableModules = _currentModule.transform.GetComponentInChildren<ExitInfo>().GetConnectableModules();
-
-        //then, WHILE allExits are NOT connected, connect!
-        ExitInfo currentExit;
-
-        for (int i = 0; i < _exits.Count; i++)
-        {
-            Debug.Log(_exits.Count);
-
-            currentExit = (ExitInfo)_exits.Dequeue();
-            Debug.Log("Dequeued exit to currentExit!");
-
-            if (!currentExit.CheckIfConnected())
-            {
-                Debug.Log("Got into if!");
-
-                bool canConnect = false;
-                ExitInfo.ModuleType modTypeToConnect = ExitInfo.ModuleType.InvalidType;
-
-                for (int k = 0; k < connectableModules.Length; k++)
-                {
-                    Debug.Log(connectableModules[k]);
-                }
-
-                while (!canConnect)
-                {
-                    int modType = Random.Range(1, 4); //1 = Room, 2 = Corridor, 3 = Junction
-
-                    switch (modType)
-                    {
-                        case 1:
-                            modTypeToConnect = ExitInfo.ModuleType.Room;
-                            Debug.Log("Switch > room!");
-                            break;
-                        case 2:
-                            modTypeToConnect = ExitInfo.ModuleType.Corridor;
-                            Debug.Log("Switch > corridor!");
-                            break;
-                        case 3:
-                            modTypeToConnect = ExitInfo.ModuleType.Junction;
-                            Debug.Log("Switch > junction!");
-                            break;
-                    }
-
-                    ArrayList canConnectMods = new ArrayList();
-
-                    for (int j = 0; j < connectableModules.Length; j++)
-                    {
-                        Debug.Log("Got into for: " + j);
-                        canConnectMods.Add(connectableModules[j]);
-                    }
-                    Debug.Log("Out of for!");
-
-
-                    if (canConnectMods.Contains(modTypeToConnect))
-                    {
-                        Debug.Log("Can connect!");
-                        canConnect = true;
-                    }
-                    else
-                    {
-                        Debug.Log("Can't connect!");
-                        canConnect = false;
-                    }
-                }
-
-               
-                Debug.Log("Got into if (canConnect!)");
-                GameObject moduleToConnect;
-
-                if (modTypeToConnect == ExitInfo.ModuleType.Room)
-                {
-                    moduleToConnect = Instantiate(_roomPrefabs[Random.Range(0, _roomPrefabs.Length)]);
-                    Debug.Log("Making a room!");
-                }
-                else if (modTypeToConnect == ExitInfo.ModuleType.Corridor)
-                {
-                    moduleToConnect = Instantiate(_corridorPrefab);
-                    Debug.Log("Making a corridor!");
-                }
-                else //modTypeToConnect == ExitInfo.ModuleType.Junction)
-                {
-                    moduleToConnect = Instantiate(_junctionPrefabs[Random.Range(0, _junctionPrefabs.Length)]);
-                    Debug.Log("Making a junction!");
-                }
-
-                float yPos = currentExit.gameObject.transform.position.y;
-                float xPos = currentExit.gameObject.transform.position.x;
-                float zPos = currentExit.gameObject.transform.position.z - moduleToConnect.transform.localScale.z / 2;
-                Vector3 pos = new Vector3(xPos, yPos, zPos);
-                Debug.Log("Pos to set: " + pos);
-                moduleToConnect.transform.position = pos;
-                Debug.Log("Pos set!");
-                currentExit.MarkAsConnected();
-                Debug.Log("Marked connected!");               
-            }
-        }
+        GenerateRandomDungeon();
     }
 
-    // Update is called once per frame
-    void Update ()
+    private void GenerateRandomDungeon() //TODO: Make it so this is repeated until enough modules are in the map!
     {
-		
-	}
+        SetStartingModule();
 
-    private GameObject PickStartingModule()
+        _currentModule = Instantiate(_allModulesToConnect.Dequeue(), Vector3.zero, Quaternion.identity); //Instantiate the module 
+
+        for (int j = 0; j < _minIterations; j++)
+        {
+            _currentModuleInfo = _currentModule.GetComponent<ModuleInfo>();
+
+            int childrenCount = _currentModule.transform.childCount;
+
+            for (int i = 0; i < childrenCount; i++)
+            {
+                GameObject _currentExit = _currentModule.transform.GetChild(i).gameObject;
+                ExitInfo _exitInfoToCheck = _currentExit.GetComponent<ExitInfo>();
+
+                if (!_exitInfoToCheck.CheckIfConnected())
+                {
+                    _exits.Enqueue(_currentExit);
+                }
+            }
+
+            while (_exits.Count > 0) //&& _moduleCount < _minIterations
+            {
+                GameObject _exitToConnectA = _exits.Dequeue(); //dequeues an exit gameobject that also has an exitinfo component that is not marked as connected.
+
+                GameObject _suitableModule = FindSuitableModule(_currentModuleInfo); //select an appropriate module to instantiate
+                //_allModulesToConnect.Enqueue(_suitableModule);
+                GameObject _exitToConnectB = _suitableModule.transform.Find("Exit").gameObject;
+
+                ConnectExits(_exitToConnectA,
+                    _exitToConnectB); //pick an exit from the _suitableModule, and connect it with a !connected exit of the _currentModule 
+            }
+
+            Debug.Log(_moduleCount);
+            Debug.Log(_minIterations);
+        }
+
+    }
+
+    /// <summary>
+    /// Tries to connect two exits. Returns true when it's a success, false when it's a failure.
+    /// Two exits are considered connected when their position are the same, and the Z+ axes are
+    /// opposite while the Y+ axes are matching.
+    /// </summary>
+    /// <param name="exitA"></param>
+    /// <param name="exitB"></param>
+    /// <returns></returns>
+    private void ConnectExits(GameObject exitA, GameObject exitB)
     {
-        int typeRandom = Random.Range(0, 2); //0 is room, 1 is junction. We won't starting with a corridor ever since we want at least 3 exits
+        //Match the positions of the exits, have their Transform.forward opposite and their Transform.up the same.
+        while (exitA.transform.forward != exitB.transform.forward * -1)
+        {
+            exitB.transform.parent.Rotate(90 * Vector3.up);
+        }
+
+        while (exitA.transform.position != exitB.transform.position)
+        {
+            exitB.transform.parent.position -= exitB.transform.forward * 0.1f; 
+        }
+
+        exitA.GetComponent<ExitInfo>().MarkAsConnected();
+        exitB.GetComponent<ExitInfo>().MarkAsConnected();
+    }
+
+    /// <summary>
+    /// Finds and instantiates a suitable module based on ModuleInfo given.
+    /// </summary>
+    /// <param name="moduleToSuit"></param>
+    /// <returns></returns>
+    private GameObject FindSuitableModule(ModuleInfo moduleToSuit)
+    {
+        bool typeSuits = false;
+        ModuleType moduleToInstantiate = ModuleType.InvalidType;
+
+        while (!typeSuits)
+        {
+            int randType = Random.Range(0, 3); //0 is Room, 1 is Junction, 2 is Corridor
+
+            switch (randType)
+            {
+                case 0:
+                    typeSuits = moduleToSuit.CanConnectToModule(ModuleType.Room);
+                    moduleToInstantiate = ModuleType.Room;
+                    break;
+                case 1:
+                    typeSuits = moduleToSuit.CanConnectToModule(ModuleType.Junction);
+                    moduleToInstantiate = ModuleType.Junction;
+                    break;
+                case 2:
+                    typeSuits = moduleToSuit.CanConnectToModule(ModuleType.Corridor);
+                    moduleToInstantiate = ModuleType.Corridor;
+                    break;
+            }
+        }
+
+        GameObject gameObjectToReturn;
+        int exitRand = -1;
+
+        switch (moduleToInstantiate)
+        {
+            case ModuleType.InvalidType:
+                Debug.LogError("We shouldn't have exited the while loop!");
+                break;
+            case ModuleType.Room:
+                exitRand = Random.Range(0, _roomPrefabs.Length);
+                gameObjectToReturn = Instantiate(_roomPrefabs[exitRand]);
+                _moduleCount++;
+                _allModulesToConnect.Enqueue(gameObjectToReturn);
+                return gameObjectToReturn;
+            case ModuleType.Junction:
+                exitRand = Random.Range(0, _junctionPrefabs.Length); // remember that index + 3 = number of exits!
+                gameObjectToReturn = Instantiate(_junctionPrefabs[exitRand]);
+                _allModulesToConnect.Enqueue(gameObjectToReturn);
+                _moduleCount++;
+                return gameObjectToReturn;
+            case ModuleType.Corridor:
+                gameObjectToReturn = Instantiate(_corridorPrefab);
+                _allModulesToConnect.Enqueue(gameObjectToReturn);
+                _moduleCount++;
+                return gameObjectToReturn;
+        }
+
+        Debug.LogError("I got out of the switch statement and didn't find a suitable module!!");
+        return gameObjectToReturn = new GameObject("I should never exist.");
+    }
+
+    private void SetStartingModule()
+    {
+        int typeRandom = -1; //0 is room, 1 is junction, 2 is corridor 
+
+        typeRandom = Random.Range(0, 2); //no corridors for startingModule!
+
         int exitsRandom = -1; //if this is -1 after the typeRandom if statements, something went wrong!
 
         GameObject _startingModule = new GameObject("Starting Module");
@@ -161,6 +179,8 @@ public class DungeonGenerator : MonoBehaviour
             _startingModule = _junctionPrefabs[exitsRandom];
         }
 
-        return _startingModule;
+        _moduleCount++;
+        _allModulesToConnect.Enqueue(_startingModule);
+        //return Instantiate(_startingModule, Vector3.zero, Quaternion.identity); //Instantiate the module
     }
 }
