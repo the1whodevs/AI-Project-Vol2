@@ -19,20 +19,6 @@ public class ExitInfo : MonoBehaviour
         _parentTag = transform.parent.tag;
         _moduleType = ConvertTagToModuleType(_parentTag);
 
-        ////initialize module type
-        //if (_parentTag == "Room")
-        //{
-        //    _moduleType = ModuleType.Room;
-        //}
-        //else if (_parentTag == "Corridor")
-        //{
-        //    _moduleType = ModuleType.Corridor;
-        //}
-        //else if (_parentTag == "Junction")
-        //{
-        //    _moduleType = ModuleType.Junction;
-        //}
-
         switch (_moduleType)
         {
             case ModuleType.Room:
@@ -52,7 +38,7 @@ public class ExitInfo : MonoBehaviour
                 break;
         }
     }
-	
+
     /// <summary>
     /// Marks the exit as connected. After this is called,
     /// CheckIfConnected will always return true.
@@ -91,4 +77,8 @@ public class ExitInfo : MonoBehaviour
             return ModuleType.InvalidType;
         }
     }
+
+    public ModuleType GetModuleType() { return _moduleType; }
+
+    public ModuleType[] GetConnectableModules() { return _connectableModules; }
 }
