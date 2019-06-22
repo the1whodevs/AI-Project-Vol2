@@ -10,6 +10,9 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private GameObject[] _junctionPrefabs; //index + 3 = number of exits 
     [SerializeField] private GameObject _corridorPrefab; //exactly 2 exits
 
+    [SerializeField] private float _rotAdjustment;
+    [SerializeField] private float _posAdjustment;
+
     [SerializeField] private int _minModulesToHave; //the algorithm will keep spawning until this number is reached
 
     private GameObject _currentModule; //the current module we're checking to connect all exits
@@ -28,18 +31,24 @@ public class DungeonGenerator : MonoBehaviour
         GenerateRandomDungeon();
     }
 
-    private void GenerateRandomDungeon() //TODO: Make it so this is repeated until enough modules are in the map!
+    private void GenerateRandomDungeon()
     {
         InitializeWithStartingModule();
+
         //Debug.Log(_allModulesToConnect.Count);
-        //while (_moduleCount < _minModulesToHave && _allModulesToConnect.Count > 0)
-        //{
-        _currentModule = _allModulesToConnect.Dequeue(); //Dequeue the module, since it's already instantiated and then queued
-        //Debug.Log(_allModulesToConnect.Count);
-        _currentModuleInfo = _currentModule.GetComponent<ModuleInfo>(); //Get module info
-        EnqueueExits(_currentModule); //Enqueue all exits 
-        //ConnectAllExits(); //Connect all exits 
-        //}
+
+        while (_moduleCount < _minModulesToHave && _allModulesToConnect.Count > 0)
+        {
+            _currentModule = _allModulesToConnect.Dequeue(); //Dequeue the module, since it's already instantiated and then queued
+
+            Debug.Log(_allModulesToConnect.Count);
+
+            _currentModuleInfo = _currentModule.GetComponent<ModuleInfo>(); //Get module info
+
+            EnqueueExits(_currentModule); //Enqueue all exits 
+
+            ConnectAllExits(); //Connect all exits 
+        }
     }
 
     /// <summary>
@@ -50,17 +59,48 @@ public class DungeonGenerator : MonoBehaviour
     /// <param name="exitA"></param>
     /// <param name="exitB"></param>
     /// <returns></returns>
-    private void ConnectExits(GameObject exitA, GameObject exitB) //TODO: Fix rotating num (currently 90) so we dont get stuck in an infinite loop!
+    private void ConnectExits(GameObject exitA, GameObject exitB) //TODO: Fix transform position adjustment as we currently get stuck in an infinite loop!
     {
         //Match the positions of the exits, have their Transform.forward opposite and their Transform.up the same.
         while (exitA.transform.forward != exitB.transform.forward * -1)
         { 
-            exitB.transform.parent.Rotate(90 * Vector3.up);
+            exitB.transform.parent.Rotate(_rotAdjustment * Vector3.up);
+            Debug.Log("Exit A: " + exitA.transform.forward);
+            Debug.Log("Exit B: " + exitB.transform.forward);
         }
 
-        while (exitA.transform.position != exitB.transform.position)
+        Debug.Log("Exit A (" + exitA.transform.forward + ") = (" + exitB.transform.forward * -1 + ")");
+
+        int direction = 1;
+        int directionChanges = 0;
+        int maxDirectionChanges = 1;
+
+        while (exitA.transform.position != exitB.transform.position) 
         {
-            exitB.transform.parent.position -= exitB.transform.forward * 0.1f; 
+            //FIND A WAY TO ALWAYS MOVE THE OBJECT TOWARDS THE RIGHT DIRECTION!
+            //The reason is, sometimes exitB parent (that we're moving, may be on the opposite direction of exitA.
+            //That means that even though the exit.forward are opposites, they do not point at each other, but away from each other
+            //This leads to an infinite loop! 
+
+            //if we're here it means that exitA is facing the opposite direction of exit B
+
+            float exitDist = Vector3.Distance(exitA.transform.position, exitB.transform.position);
+            //this needs to be fixed; how do we know we're moving towards the right direction?
+            exitB.transform.parent.position += direction * exitA.transform.forward * 0.1f;
+
+            float postExitDist = Vector3.Distance(exitA.transform.position, exitB.transform.position);
+
+            if (exitDist < postExitDist)
+            {
+                direction *= -1;
+                directionChanges++;
+                Debug.Log("Changed direction!");
+            }
+
+            if (directionChanges > maxDirectionChanges)
+            {
+                break;
+            }
         }
 
         exitA.GetComponent<ExitInfo>().MarkAsConnected();
@@ -160,7 +200,6 @@ public class DungeonGenerator : MonoBehaviour
         while (_exits.Count > 0)
         {
             GameObject _exitToConnectA = _exits.Dequeue(); //dequeues an exit gameobject that also has an exitinfo component that is not marked as connected.
-            Debug.Log("Exits: " + _exits.Count);
 
             GameObject _suitableModule = FindSuitableModule(_currentModuleInfo); //select an appropriate module to instantiate
             _moduleCount++; //we're increasing the module count since FindSuitableModule spawns a module!
@@ -184,7 +223,6 @@ public class DungeonGenerator : MonoBehaviour
             if (!_exitInfoToCheck.CheckIfConnected())
             {
                 _exits.Enqueue(_currentExit);
-                Debug.Log("Exits: " + _exits.Count);
             }
         }
     }
