@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.3731152, g: 0.38073796, b: 0.35873365, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311575, g: 0.38073805, b: 0.3587338, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -253,7 +253,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 726056141}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 104.57, z: -10}
+  m_LocalPosition: {x: 0, y: 70.03, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -268,6 +268,7 @@ GameObject:
   m_Component:
   - component: {fileID: 841445812}
   - component: {fileID: 841445811}
+  - component: {fileID: 841445813}
   m_Layer: 0
   m_Name: PCG
   m_TagString: Untagged
@@ -281,7 +282,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 841445810}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9802059a8271c3e4992d4022da53c0dd, type: 3}
   m_Name: 
@@ -298,7 +299,7 @@ MonoBehaviour:
     type: 2}
   _rotAdjustment: 7.5
   _posAdjustment: 0.1
-  _minModulesToHave: 50
+  _minModulesToHave: 5
 --- !u!4 &841445812
 Transform:
   m_ObjectHideFlags: 0
@@ -312,3 +313,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &841445813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 841445810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14018369226d16345aed706802aef720, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _roomPrefabs:
+  - {fileID: 1893288578611682, guid: 070c5e61821b90b4fb7972b670274d14, type: 2}
+  - {fileID: 1997022035977720, guid: 411123a0fb923d44dbca8a7326ba5e7a, type: 2}
+  - {fileID: 1141190439579996, guid: 19a30f893d535714aad690b86d91bdd1, type: 2}
+  - {fileID: 1119354234808280, guid: e3ee4115a0ce63c46b6305a8065fe2ca, type: 2}
+  _junctionPrefabs:
+  - {fileID: 1887968933716188, guid: ad9c0c24c4fb32c43a2490619c742f54, type: 2}
+  - {fileID: 1828601874963942, guid: 3029cea8184deb14eb38f8f81f126660, type: 2}
+  _corridorPrefab: {fileID: 1246081502423892, guid: 1761285a9ec79354d84cf4979b15b50f,
+    type: 2}
+  _rotAdjustment: 7.5
+  _posAdjustment: 0.1
+  _minModulesToHave: 10

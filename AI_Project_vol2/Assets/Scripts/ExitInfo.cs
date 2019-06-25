@@ -10,7 +10,11 @@ public class ExitInfo : MonoBehaviour
     /// Marks the exit as connected. After this is called,
     /// CheckIfConnected will always return true.
     /// </summary>
-	public void MarkAsConnected() { _connected = true; }
+	public void MarkAsConnected()
+    {
+        _connected = true;
+        Destroy(gameObject);
+    }
 
     /// <summary>
     /// Returns the value of _connected. If true, there is no need to connect anything more to this exit.

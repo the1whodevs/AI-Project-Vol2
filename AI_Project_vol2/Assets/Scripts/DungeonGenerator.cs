@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ModuleType { Room, Corridor, Junction, InvalidType }
-
 public class DungeonGenerator : MonoBehaviour
 {
     [SerializeField] private GameObject[] _roomPrefabs; //index + 1 = number of exits
@@ -65,43 +63,44 @@ public class DungeonGenerator : MonoBehaviour
         while (exitA.transform.forward != exitB.transform.forward * -1)
         { 
             exitB.transform.parent.Rotate(_rotAdjustment * Vector3.up);
-            Debug.Log("Exit A: " + exitA.transform.forward);
-            Debug.Log("Exit B: " + exitB.transform.forward);
         }
-
-        Debug.Log("Exit A (" + exitA.transform.forward + ") = (" + exitB.transform.forward * -1 + ")");
 
         int direction = 1;
         int directionChanges = 0;
         int maxDirectionChanges = 1;
+        float minDist = 0.1f;
 
         while (exitA.transform.position != exitB.transform.position) 
         {
-            //FIND A WAY TO ALWAYS MOVE THE OBJECT TOWARDS THE RIGHT DIRECTION!
-            //The reason is, sometimes exitB parent (that we're moving, may be on the opposite direction of exitA.
-            //That means that even though the exit.forward are opposites, they do not point at each other, but away from each other
-            //This leads to an infinite loop! 
 
             //if we're here it means that exitA is facing the opposite direction of exit B
 
-            float exitDist = Vector3.Distance(exitA.transform.position, exitB.transform.position);
-            //this needs to be fixed; how do we know we're moving towards the right direction?
+            if (Vector3.Dot(exitA.transform.forward, exitB.transform.forward).Equals(1.0f))
+            {
+                direction = 1;
+            }
+            else
+            {
+                Debug.Log(Vector3.Dot(exitA.transform.forward, exitB.transform.forward));
+                direction = -1;
+                directionChanges++;
+            }
+
             exitB.transform.parent.position += direction * exitA.transform.forward * 0.1f;
 
-            float postExitDist = Vector3.Distance(exitA.transform.position, exitB.transform.position);
-
-            if (exitDist < postExitDist)
+            if (Vector3.Distance(exitA.transform.forward, exitB.transform.forward) < minDist)
             {
-                direction *= -1;
-                directionChanges++;
-                Debug.Log("Changed direction!");
+                Debug.Log("Dist is ok!");
+                break;
             }
 
             if (directionChanges > maxDirectionChanges)
             {
+                Debug.Log(Vector3.Dot(exitA.transform.forward, exitB.transform.forward));
                 break;
             }
-        }
+        } 
+        Debug.Log("____OVERALL________DONE_______OVERALL______");
 
         exitA.GetComponent<ExitInfo>().MarkAsConnected();
         exitB.GetComponent<ExitInfo>().MarkAsConnected();
