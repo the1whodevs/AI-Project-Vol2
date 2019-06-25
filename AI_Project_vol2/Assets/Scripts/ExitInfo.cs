@@ -13,7 +13,6 @@ public class ExitInfo : MonoBehaviour
 	public void MarkAsConnected()
     {
         _connected = true;
-        gameObject.name = "Connected Exit";
     }
 
     /// <summary>
