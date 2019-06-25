@@ -47,31 +47,25 @@ public class DungeonGeneratorVol2 : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        InitializeWithFirstModule();
+
+        while (_moduleCount < _minModulesToHave && _allModulesToConnect.Count > 0)
+        {
+            _currentModule = _allModulesToConnect.Dequeue();
+            EnqueueAllExits();
+            ConnectExits();
+        }
+    }
+
+    private void InitializeWithFirstModule()
+    {
         _currentModule = PickStartingModule();
 
-        while (_moduleCount < _minModulesToHave)
-        {
-            //Enqueue all exits
-            EnqueueAllExits();
+        //Enqueue all exits
+        EnqueueAllExits();
 
-            Debug.Log("Found " + _currentModule.transform.childCount + " children!");
-            Debug.Log("Enqueued " + _exits.Count + " children!");
-
-            //Dequeue the _exits one by one and connect them with suitable modules
-            ConnectExits();
-
-            //All exits of current module are connected at this point
-            //change current module and repeat!
-
-            if (_allModulesToConnect.Count > 0)
-            {
-                _currentModule = _allModulesToConnect.Dequeue();
-            }
-            else
-            {
-                break; //no more modules to spawn! 
-            }
-        }
+        //Dequeue the _exits one by one and connect them with suitable modules
+        ConnectExits();
     }
 
     private void ConnectExits()
@@ -180,13 +174,10 @@ public class DungeonGeneratorVol2 : MonoBehaviour
                 child.name = "Queued Exit";
             }
         }
-    }
 
-    // Update is called once per frame
-    void Update ()
-    {
-		
-	}
+        Debug.Log("Found " + _currentModule.transform.childCount + " children!");
+        Debug.Log("Enqueued " + _exits.Count + " children!");
+    }
 
     //Instantiates at 0,0,0 a room with at least 3 exits, and returns a reference to it.
     private GameObject PickStartingModule()
