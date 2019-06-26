@@ -66,40 +66,23 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         int direction = 1;
-        int directionChanges = 0;
-        int maxDirectionChanges = 1;
-        float minDist = 0.1f;
+
+        Debug.Log(Vector3.Dot(exitA.transform.forward, exitB.transform.forward));
+
+        if (Mathf.Approximately(Vector3.Dot(exitA.transform.forward, exitB.transform.forward),1.0f))
+        {
+            direction = 1;
+        }
+        else
+        {
+            direction = -1;
+        }
 
         while (exitA.transform.position != exitB.transform.position) 
         {
-
-            //if we're here it means that exitA is facing the opposite direction of exit B
-
-            if (Vector3.Dot(exitA.transform.forward, exitB.transform.forward).Equals(1.0f))
-            {
-                direction = 1;
-            }
-            else
-            {
-                Debug.Log(Vector3.Dot(exitA.transform.forward, exitB.transform.forward));
-                direction = -1;
-                directionChanges++;
-            }
-
-            exitB.transform.parent.position += direction * exitA.transform.forward * 0.1f;
-
-            if (Vector3.Distance(exitA.transform.forward, exitB.transform.forward) < minDist)
-            {
-                Debug.Log("Dist is ok!");
-                break;
-            }
-
-            if (directionChanges > maxDirectionChanges)
-            {
-                Debug.Log(Vector3.Dot(exitA.transform.forward, exitB.transform.forward));
-                break;
-            }
+            exitB.transform.parent.position += direction * exitB.transform.forward * _posAdjustment;
         } 
+
         Debug.Log("____OVERALL________DONE_______OVERALL______");
 
         exitA.GetComponent<ExitInfo>().MarkAsConnected();
@@ -219,7 +202,7 @@ public class DungeonGenerator : MonoBehaviour
             GameObject _currentExit = parentModule.transform.GetChild(i).gameObject;
             ExitInfo _exitInfoToCheck = _currentExit.GetComponent<ExitInfo>();
 
-            if (!_exitInfoToCheck.CheckIfConnected())
+            if (!_exitInfoToCheck.IsConnected())
             {
                 _exits.Enqueue(_currentExit);
             }

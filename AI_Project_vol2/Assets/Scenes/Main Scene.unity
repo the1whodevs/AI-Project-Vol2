@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311575, g: 0.38073805, b: 0.3587338, a: 1}
+  m_IndirectSpecularColor: {r: 0.43632892, g: 0.47471088, b: 0.51471496, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -171,13 +171,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 244904838}
-  m_LocalRotation: {x: 0, y: -0.258819, z: 0, w: 0.9659259}
+  m_LocalRotation: {x: 0.08667833, y: 0.10413069, z: -0.00911026, w: 0.9907375}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 10, y: 12, z: 0}
 --- !u!1 &726056141
 GameObject:
   m_ObjectHideFlags: 0
@@ -267,8 +267,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 841445812}
-  - component: {fileID: 841445811}
-  - component: {fileID: 841445813}
+  - component: {fileID: 841445814}
   m_Layer: 0
   m_Name: PCG
   m_TagString: Untagged
@@ -276,30 +275,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &841445811
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 841445810}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9802059a8271c3e4992d4022da53c0dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _roomPrefabs:
-  - {fileID: 1893288578611682, guid: 070c5e61821b90b4fb7972b670274d14, type: 2}
-  - {fileID: 1997022035977720, guid: 411123a0fb923d44dbca8a7326ba5e7a, type: 2}
-  - {fileID: 1141190439579996, guid: 19a30f893d535714aad690b86d91bdd1, type: 2}
-  - {fileID: 1119354234808280, guid: e3ee4115a0ce63c46b6305a8065fe2ca, type: 2}
-  _junctionPrefabs:
-  - {fileID: 1887968933716188, guid: ad9c0c24c4fb32c43a2490619c742f54, type: 2}
-  - {fileID: 1828601874963942, guid: 3029cea8184deb14eb38f8f81f126660, type: 2}
-  _corridorPrefab: {fileID: 1246081502423892, guid: 1761285a9ec79354d84cf4979b15b50f,
-    type: 2}
-  _rotAdjustment: 7.5
-  _posAdjustment: 0.1
-  _minModulesToHave: 5
 --- !u!4 &841445812
 Transform:
   m_ObjectHideFlags: 0
@@ -307,13 +282,13 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 841445810}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.4623823, y: -5.1216455, z: 7.654504}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &841445813
+--- !u!114 &841445814
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -321,9 +296,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 841445810}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14018369226d16345aed706802aef720, type: 3}
+  m_Script: {fileID: 11500000, guid: baa8124d5f9559147adcc297637f51af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _minModulesToHave: 4
   _roomPrefabs:
   - {fileID: 1893288578611682, guid: 070c5e61821b90b4fb7972b670274d14, type: 2}
   - {fileID: 1997022035977720, guid: 411123a0fb923d44dbca8a7326ba5e7a, type: 2}
@@ -334,6 +310,3 @@ MonoBehaviour:
   - {fileID: 1828601874963942, guid: 3029cea8184deb14eb38f8f81f126660, type: 2}
   _corridorPrefab: {fileID: 1246081502423892, guid: 1761285a9ec79354d84cf4979b15b50f,
     type: 2}
-  _rotAdjustment: 7.5
-  _posAdjustment: 0.1
-  _minModulesToHave: 10

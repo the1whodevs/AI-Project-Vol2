@@ -8,11 +8,12 @@ public class ExitInfo : MonoBehaviour
 
     /// <summary>
     /// Marks the exit as connected. After this is called,
-    /// CheckIfConnected will always return true.
+    /// IsConnected will always return true.
     /// </summary>
 	public void MarkAsConnected()
     {
         _connected = true;
+        gameObject.name = "Connected Exit";
     }
 
     /// <summary>
@@ -20,6 +21,6 @@ public class ExitInfo : MonoBehaviour
     /// If false, this exits needs something to connect to!
     /// </summary>
     /// <returns></returns>
-    public bool CheckIfConnected() { return _connected; }
+    public bool IsConnected() { return _connected; }
 
 }
