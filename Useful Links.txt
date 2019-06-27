@@ -1,0 +1,1 @@
+Prevent Unity Hanging: https://blogs.unity3d.com/2016/05/24/breakout-how-to-stop-an-infinite-loop-in-a-unity-c-script/
