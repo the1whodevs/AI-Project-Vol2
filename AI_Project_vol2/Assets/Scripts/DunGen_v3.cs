@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ModuleType { Room, Corridor, Junction, InvalidType }
+
 public class DunGen_v3 : MonoBehaviour
 {
     [SerializeField] private GameObject _portalGO;
@@ -27,7 +29,7 @@ public class DunGen_v3 : MonoBehaviour
 
     private int _instantiatedModules = 0;
 
-    private bool _restart = false;
+    private bool _restarting = false;
 
     // Use this for initialization
 	void Start ()
@@ -38,15 +40,21 @@ public class DunGen_v3 : MonoBehaviour
 
     public void RestartGeneration()
     {
-        _restart = true;
-
-        foreach (GameObject gObject in _allGameObjectsSpawned)
+        if (!_restarting)
         {
-            Destroy(gObject);
-        }
+            _restarting = true;
+            Debug.Log("Restart generation!");
 
-        _restart = false;
-        GenerateDungeon();
+            foreach (GameObject gObject in _allGameObjectsSpawned)
+            {
+                Destroy(gObject);
+            }
+
+            _instantiatedModules = 0;
+            _exitsQueue.Clear();
+            GenerateDungeon();
+            _restarting = false;
+        }
     }
 
     private void GenerateDungeon()
@@ -54,7 +62,7 @@ public class DunGen_v3 : MonoBehaviour
         _currentModule = PickStartingModule();
         _allGameObjectsSpawned.Add(_currentModule);
         _portal.SetStartingModulePosition(_currentModule.transform.position);
-        _currentModule.name = "Staring Module";
+        _currentModule.name = "Starting Module";
         _currentModInfo = _currentModule.GetComponent<ModuleInfo>();
 
         //queue all of currentModule's exits (all enqueued exits are not connected!)
@@ -65,15 +73,14 @@ public class DunGen_v3 : MonoBehaviour
                 if (!_currentModule.transform.Find("Exit").GetComponent<ExitInfo>().IsConnected())
                 {
                     _exitsQueue.Enqueue(_currentModule.transform.Find("Exit").gameObject);
-                    Debug.Log("Queued child!");
                     _currentModule.transform.Find("Exit").gameObject.name = "Queued Exit";
                 }
             }
         }
 
-        _currentExit = _exitsQueue.Dequeue();
+        _currentExit = _exitsQueue.Dequeue(); 
 
-        while (_exitsQueue.Count > 0 && !_restart)
+        while (_exitsQueue.Count > 0)
         {
             //Find a suitable module
             GameObject _suitableModule = FindSuitableModule(_currentModInfo);
@@ -81,7 +88,7 @@ public class DunGen_v3 : MonoBehaviour
 
             if (_suitableModule.GetComponent<ModuleInfo>().GetModuleType() == ModuleType.Corridor)
             {
-                _corridorScaleMultiplier = Random.Range(0.5f, 10.0f);
+                _corridorScaleMultiplier = Random.Range(1.0f, 10.0f);
                 _suitableModule.transform.localScale += Vector3.right * _corridorScaleMultiplier;
             }
 
@@ -101,7 +108,6 @@ public class DunGen_v3 : MonoBehaviour
                         if (!_suitableModule.transform.Find("Exit").GetComponent<ExitInfo>().IsConnected())
                         {
                             _exitsQueue.Enqueue(_suitableModule.transform.Find("Exit").gameObject);
-                            Debug.Log("Queued child of suitable module!");
                             _suitableModule.transform.Find("Exit").gameObject.name = "Queued Exit";
                         }
                     }

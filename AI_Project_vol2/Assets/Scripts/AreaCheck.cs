@@ -10,8 +10,6 @@ public class AreaCheck : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Room") || other.gameObject.CompareTag("Junction"))
         {
-            Debug.Log(gameObject.name + " collided with " + other.gameObject.name);
-            //SceneManager.LoadScene(0); //restart the process!
             GameObject.Find("PCG").GetComponent<DunGen_v3>().RestartGeneration();
         }
     }

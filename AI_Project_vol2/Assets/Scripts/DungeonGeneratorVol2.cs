@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ModuleType { Room, Corridor, Junction, InvalidType }
-
 public class DungeonGeneratorVol2 : MonoBehaviour
 {
 
