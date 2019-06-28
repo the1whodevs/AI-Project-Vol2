@@ -51,11 +51,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\AreaCheck.cs" />
      <Compile Include="Assets\Scripts\DunGen_v3.cs" />
      <Compile Include="Assets\Scripts\DungeonGenerator.cs" />
      <Compile Include="Assets\Scripts\DungeonGeneratorVol2.cs" />
      <Compile Include="Assets\Scripts\ExitInfo.cs" />
      <Compile Include="Assets\Scripts\ModuleInfo.cs" />
+     <Compile Include="Assets\Scripts\Portal.cs" />
  <Reference Include="UnityEngine.CoreModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2017.4.27f1/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
  </Reference>

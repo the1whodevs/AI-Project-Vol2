@@ -4,52 +4,86 @@ using UnityEngine;
 
 public class DunGen_v3 : MonoBehaviour
 {
+    [SerializeField] private GameObject _portalGO;
+
     [SerializeField] private int _minModulesToHave;
 
     [SerializeField] private GameObject[] _roomPrefabs;
     [SerializeField] private GameObject[] _junctionPrefabs;
     [SerializeField] private GameObject _corridorPrefab;
 
+    private Portal _portal;
+
     private GameObject _currentModule;
     private GameObject _currentExit;
+
     private Queue<GameObject> _exitsQueue = new Queue<GameObject>();
+
+    private ArrayList _allGameObjectsSpawned = new ArrayList();
 
     private ModuleInfo _currentModInfo;
 
+    private float _corridorScaleMultiplier = 1.0f;
+
     private int _instantiatedModules = 0;
+
+    private bool _restart = false;
 
     // Use this for initialization
 	void Start ()
     {
+        _portal = _portalGO.GetComponent<Portal>();
+        GenerateDungeon();
+    }
+
+    public void RestartGeneration()
+    {
+        _restart = true;
+
+        foreach (GameObject gObject in _allGameObjectsSpawned)
+        {
+            Destroy(gObject);
+        }
+
+        _restart = false;
+        GenerateDungeon();
+    }
+
+    private void GenerateDungeon()
+    {
         _currentModule = PickStartingModule();
+        _allGameObjectsSpawned.Add(_currentModule);
+        _portal.SetStartingModulePosition(_currentModule.transform.position);
+        _currentModule.name = "Staring Module";
         _currentModInfo = _currentModule.GetComponent<ModuleInfo>();
 
         //queue all of currentModule's exits (all enqueued exits are not connected!)
         for (int i = 0; i < _currentModule.transform.childCount; i++)
         {
-            if (!_currentModule.transform.Find("Exit").GetComponent<ExitInfo>().IsConnected())
+            if (_currentModule.transform.Find("Exit"))
             {
-                _exitsQueue.Enqueue(_currentModule.transform.Find("Exit").gameObject); 
-                Debug.Log("Queued child!");
-                _currentModule.transform.Find("Exit").gameObject.name = "Queued Exit";
+                if (!_currentModule.transform.Find("Exit").GetComponent<ExitInfo>().IsConnected())
+                {
+                    _exitsQueue.Enqueue(_currentModule.transform.Find("Exit").gameObject);
+                    Debug.Log("Queued child!");
+                    _currentModule.transform.Find("Exit").gameObject.name = "Queued Exit";
+                }
             }
         }
 
         _currentExit = _exitsQueue.Dequeue();
 
-        while (_exitsQueue.Count > 0)
+        while (_exitsQueue.Count > 0 && !_restart)
         {
-            //if (_currentExit.GetComponent<ExitInfo>().IsConnected())
-            //{
-            //    _currentExit = _exitsQueue.Dequeue();
-            //    _currentModule = _currentExit.transform.parent.gameObject;
-            //    _currentModInfo = _currentModule.GetComponent<ModuleInfo>();
-            //}
-
-            //_currentExit = _exitsQueue.Dequeue();
-
             //Find a suitable module
             GameObject _suitableModule = FindSuitableModule(_currentModInfo);
+            _allGameObjectsSpawned.Add(_suitableModule);
+
+            if (_suitableModule.GetComponent<ModuleInfo>().GetModuleType() == ModuleType.Corridor)
+            {
+                _corridorScaleMultiplier = Random.Range(0.5f, 10.0f);
+                _suitableModule.transform.localScale += Vector3.right * _corridorScaleMultiplier;
+            }
 
             //Get one of the suitable module's exits
             GameObject _exitToConnect = _suitableModule.transform.Find("Exit").gameObject;
@@ -71,7 +105,7 @@ public class DunGen_v3 : MonoBehaviour
                             _suitableModule.transform.Find("Exit").gameObject.name = "Queued Exit";
                         }
                     }
-                } 
+                }
             }
 
             if (_exitsQueue.Count > 0) //reaching this point means _currentExit is connected!
@@ -80,7 +114,8 @@ public class DunGen_v3 : MonoBehaviour
                 _currentModule = _currentExit.transform.parent.gameObject;
                 _currentModInfo = _currentModule.GetComponent<ModuleInfo>();
             }
-        }
+        } 
+        
     }
 
     /// <summary>
@@ -97,19 +132,13 @@ public class DunGen_v3 : MonoBehaviour
         exitB.transform.parent.rotation = Quaternion.Euler(0.0f, exitB.transform.parent.rotation.y, 0.0f);
 
         //Then move exitB parent on exitA transform position
-        exitB.transform.parent.position = exitA.transform.position; //TODO: fix the 0.5f hardcoded value!
-
+        exitB.transform.parent.position =
+            exitA.transform.position + exitA.transform.forward * (exitB.transform.parent.localScale.x / 2);
 
         //Then rotate exitB parent until exitB.transform.forward * -1 == exitA.transform.forward
         while (exitA.transform.forward != -1 * exitB.transform.forward)
         {
             exitB.transform.parent.Rotate(Vector3.up * 0.5f); //TODO: fix the 0.5f hardcoded value!
-        }
-
-        //Then, pull the exitB parent until the exitA.pos == exitB.pos
-        while (exitA.transform.position != exitB.transform.position)
-        {
-            exitB.transform.parent.position += exitB.transform.forward * -1 * 0.5f; //TODO: fix the 0.5f hardcoded value!
         }
 
         //Finally, mark the two exits as connected!
@@ -159,12 +188,14 @@ public class DunGen_v3 : MonoBehaviour
                 int exitRandRoom = Random.Range(0, _roomPrefabs.Length);
                 _instantiatedModules++;
                 return Instantiate(_roomPrefabs[exitRandRoom]);
+
             case ModuleType.Junction:
                 int exitRandJunction = Random.Range(0, _junctionPrefabs.Length);
                 _instantiatedModules++;
                 return Instantiate(_junctionPrefabs[exitRandJunction]);
+
             case ModuleType.Corridor:
-                //_instantiatedModules++; //We won't count corridors as modules to make sure nothing ends with a corridor!
+                //_instantiatedModules++;
                 return Instantiate(_corridorPrefab);
         }
 
