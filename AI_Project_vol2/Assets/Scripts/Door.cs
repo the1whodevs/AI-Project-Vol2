@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Door : MonoBehaviour
 {
     [SerializeField] private DoorType _doorType;
 
-    [SerializeField] private GameObject _eToInteract;
+    [SerializeField] private GameObject _playerTextGO;
 
     private enum DoorType { Trigger, Interact }
 
@@ -17,7 +18,7 @@ public class Door : MonoBehaviour
     // Use this for initialization
 	void Start ()
     {
-        _eToInteract.SetActive(false);
+        _playerTextGO.SetActive(false);
         if (_doorType == DoorType.Interact)
         {
             _doorAnimator = GameObject.Find("Interact Door").GetComponent<Animator>();
@@ -38,7 +39,8 @@ public class Door : MonoBehaviour
         }
         else if (_doorType == DoorType.Interact)
         {
-            _eToInteract.SetActive(true);
+            _playerTextGO.GetComponent<Text>().text = "Press E to interact!";
+            _playerTextGO.SetActive(true);
         }
     }
 
@@ -51,7 +53,7 @@ public class Door : MonoBehaviour
         }
         else if (_doorType == DoorType.Interact)
         {
-            _eToInteract.SetActive(false);
+            _playerTextGO.SetActive(false);
         }
     }
 

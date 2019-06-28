@@ -24,6 +24,8 @@ public class PlayerMovement : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         _playerAudioSource = GetComponent<AudioSource>();
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 	
 	// Update is called once per frame
@@ -31,6 +33,26 @@ public class PlayerMovement : MonoBehaviour
     {
         MovePlayer();
         RotatePlayer();
+        EnableDisaleCursor();
+    }
+
+    void EnableDisaleCursor()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            bool currentState = Cursor.visible;
+
+            if (currentState)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
     }
 
     void PlayStepSound()

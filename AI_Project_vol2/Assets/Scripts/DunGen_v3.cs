@@ -6,9 +6,8 @@ public enum ModuleType { Room, Corridor, Junction, InvalidType }
 
 public class DunGen_v3 : MonoBehaviour
 {
-    [SerializeField] private GameObject _portalGO;
-
-    [SerializeField] private int _minModulesToHave;
+    [SerializeField] private GameObject _basePortalGO;
+    [SerializeField] private GameObject _portalPrefab; //this is instantiated at the last module
 
     [SerializeField] private GameObject[] _roomPrefabs;
     [SerializeField] private GameObject[] _junctionPrefabs;
@@ -27,33 +26,52 @@ public class DunGen_v3 : MonoBehaviour
 
     private float _corridorScaleMultiplier = 1.0f;
 
+    private int _minModulesToHave = 10;
     private int _instantiatedModules = 0;
 
-    private bool _restarting = false;
+    private bool _done = false;
+    private bool _spawnedPortal = false;
+
+    private bool _buttonPressed = false;
 
     // Use this for initialization
 	void Start ()
     {
-        _portal = _portalGO.GetComponent<Portal>();
-        GenerateDungeon();
+        _portal = _basePortalGO.GetComponent<Portal>();
+        //GenerateDungeon();
+    }
+
+    void Update()
+    {
+        if (!_spawnedPortal && _done)
+        {
+            _spawnedPortal = true;
+            SpawnPortal();
+        }
     }
 
     public void RestartGeneration()
     {
-        if (!_restarting)
+        _done = false;
+        _spawnedPortal = false;
+        Debug.Log("Restart generation!");
+
+        foreach (GameObject gObject in _allGameObjectsSpawned)
         {
-            _restarting = true;
-            Debug.Log("Restart generation!");
+            Destroy(gObject);
+        }
 
-            foreach (GameObject gObject in _allGameObjectsSpawned)
-            {
-                Destroy(gObject);
-            }
+        _instantiatedModules = 0;
+        _exitsQueue.Clear();
+        GenerateDungeon();
+    }
 
-            _instantiatedModules = 0;
-            _exitsQueue.Clear();
+    public void StartGeneration()
+    {
+        if (!_buttonPressed)
+        {
             GenerateDungeon();
-            _restarting = false;
+            _buttonPressed = true;
         }
     }
 
@@ -120,8 +138,22 @@ public class DunGen_v3 : MonoBehaviour
                 _currentModule = _currentExit.transform.parent.gameObject;
                 _currentModInfo = _currentModule.GetComponent<ModuleInfo>();
             }
-        } 
-        
+
+        }
+
+        _done = true;
+    }
+
+    void SpawnPortal()
+    {
+        GameObject portalSpawned = Instantiate(_portalPrefab,
+            _currentModule.transform.position + (Vector3.up * _portalPrefab.transform.localScale.y),
+            Quaternion.identity);
+
+        _allGameObjectsSpawned.Add(portalSpawned);
+
+        Portal _portalInfo = portalSpawned.GetComponent<Portal>();
+        _portalInfo.SetDestination(Destination.Start);
     }
 
     /// <summary>
